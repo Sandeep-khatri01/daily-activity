@@ -1,1 +1,29 @@
+name: Daily Activity
 
+on:
+  schedule:
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Maybe skip today
+        run: |
+          if [ $((RANDOM % 7)) -eq 0 ]; then echo "SKIP=1" >> $GITHUB_ENV; fi
+
+      - name: Commit daily log
+        if: env.SKIP != '1'
+        run: |
+          git config user.name "Sandeep-khatri01"
+          git config user.email "178879030+Sandeep-khatri01@users.noreply.github.com"
+          date -u +%F >> activity.log
+          git add activity.log
+          git commit -m "chore: daily log $(date -u +%F)"
+          git push
